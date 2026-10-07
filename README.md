@@ -24,6 +24,7 @@ A small project for learning the client-server model with plain TCP sockets. It 
    > HELP
    > ECHO hello
    > UPPER hello world
+   > REVERSE hello
    > ADD 2 3
    > TIME
    > CLIENTS
@@ -58,7 +59,7 @@ Watch the server terminal while you do this. It logs every connection, request a
 
 ## Things to try next
 
-1. Add a new command such as `REVERSE <text>` in `handle_request()` in `server.py`.
+1. ~~Add a new command such as `REVERSE <text>` in `handle_request()` in `server.py`.~~ Done. Try adding your own command the same way, e.g. `COUNT <text>` (number of characters).
 2. Connect from another computer: set `HOST = "0.0.0.0"` in `server.py`, then run `python client.py <server-ip> 5000` on the other machine. You may need to allow Python through the firewall.
 3. Make a chat room: let clients pick a name with `NICK <name>` and show it in broadcasts.
 4. Switch the protocol to JSON messages (`json.dumps` / `json.loads`).
