@@ -11,6 +11,7 @@ How it works:
 Protocol (text based, one message per line, ending with "\n"):
   ECHO <text>     -> server replies with the same text
   UPPER <text>    -> server replies with the text in UPPERCASE
+  REVERSE <text>  -> server replies with the text backwards
   ADD <a> <b>     -> server replies with a + b
   TIME            -> server replies with the current server time
   CLIENTS         -> number of clients currently connected
@@ -62,6 +63,8 @@ def handle_request(line, conn, addr):
         return argument
     if command == "UPPER":
         return argument.upper()
+    if command == "REVERSE":
+        return argument[::-1]  # slice with step -1 walks the string from end to start
     if command == "ADD":
         try:
             a, b = argument.split()
@@ -77,7 +80,7 @@ def handle_request(line, conn, addr):
         broadcast(f"[broadcast from {addr[0]}:{addr[1]}] {argument}", sender=conn)
         return "OK broadcast sent"
     if command == "HELP":
-        return "Commands: ECHO <text>, UPPER <text>, ADD <a> <b>, TIME, CLIENTS, BROADCAST <msg>, HELP, QUIT"
+        return "Commands: ECHO <text>, UPPER <text>, REVERSE <text>, ADD <a> <b>, TIME, CLIENTS, BROADCAST <msg>, HELP, QUIT"
     if command == "QUIT":
         return None
     return f"ERROR unknown command '{command}'. Type HELP."
