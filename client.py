@@ -9,6 +9,9 @@ How it works:
 
 Run:  python client.py            (connects to 127.0.0.1:5000)
       python client.py <host> <port>
+
+Type hints (the ": str" and "-> None" parts) say what type each value should be.
+Python does not check them when running; they are notes for readers and editors.
 """
 
 import socket
@@ -20,9 +23,9 @@ PORT = 5000
 ENCODING = "utf-8"
 
 
-def receive_loop(sock):
+def receive_loop(sock: socket.socket) -> None:
     """Print every line the server sends until the connection closes."""
-    buffer = ""
+    buffer: str = ""  # text received but not yet ended with "\n"
     while True:
         try:
             data = sock.recv(1024)
@@ -37,9 +40,9 @@ def receive_loop(sock):
             print(f"\rServer: {line}\n> ", end="", flush=True)
 
 
-def main():
-    host = sys.argv[1] if len(sys.argv) > 1 else HOST
-    port = int(sys.argv[2]) if len(sys.argv) > 2 else PORT
+def main() -> None:
+    host: str = sys.argv[1] if len(sys.argv) > 1 else HOST
+    port: int = int(sys.argv[2]) if len(sys.argv) > 2 else PORT
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:

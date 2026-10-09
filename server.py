@@ -20,6 +20,9 @@ Protocol (text based, one message per line, ending with "\n"):
   QUIT            -> server says goodbye and closes the connection
 
 Run:  python server.py
+
+Type hints (the ": str" and "-> None" parts) say what type each value should be.
+Python does not check them when running; they are notes for readers and editors.
 """
 
 import socket
@@ -30,21 +33,24 @@ HOST = "127.0.0.1"  # localhost: only this machine can connect. Use "0.0.0.0" to
 PORT = 5000         # any free port above 1024 works
 ENCODING = "utf-8"
 
+# A client's address is a (ip, port) tuple, e.g. ("127.0.0.1", 50562).
+Address = tuple[str, int]
+
 # Shared state between threads -> must be protected with a lock.
-clients = {}  # socket -> address
+clients: dict[socket.socket, Address] = {}  # socket -> address
 clients_lock = threading.Lock()
 
 
-def log(message):
+def log(message: str) -> None:
     print(f"[{datetime.now():%H:%M:%S}] {message}")
 
 
-def send_line(conn, text):
+def send_line(conn: socket.socket, text: str) -> None:
     """Send one message. The trailing newline tells the receiver where the message ends."""
     conn.sendall((text + "\n").encode(ENCODING))
 
 
-def broadcast(text, sender=None):
+def broadcast(text: str, sender: socket.socket | None = None) -> None:
     with clients_lock:
         targets = [c for c in clients if c is not sender]
     for conn in targets:
@@ -54,7 +60,7 @@ def broadcast(text, sender=None):
             pass  # that client has probably disconnected; its own thread will clean up
 
 
-def handle_request(line, conn, addr):
+def handle_request(line: str, conn: socket.socket, addr: Address) -> str | None:
     """Turn one request line into a response string. Returns None to close the connection."""
     command, _, argument = line.partition(" ")
     command = command.upper()
@@ -86,7 +92,7 @@ def handle_request(line, conn, addr):
     return f"ERROR unknown command '{command}'. Type HELP."
 
 
-def handle_client(conn, addr):
+def handle_client(conn: socket.socket, addr: Address) -> None:
     """Runs in its own thread: one per connected client."""
     log(f"Connected: {addr}")
     with clients_lock:
@@ -94,7 +100,7 @@ def handle_client(conn, addr):
 
     send_line(conn, "Welcome! Type HELP to see the available commands.")
 
-    buffer = ""
+    buffer: str = ""  # text received but not yet ended with "\n"
     try:
         while True:
             # recv() returns whatever bytes have arrived so far (up to 1024).
@@ -125,7 +131,7 @@ def handle_client(conn, addr):
         log(f"Disconnected: {addr}")
 
 
-def main():
+def main() -> None:
     # AF_INET = IPv4, SOCK_STREAM = TCP (reliable, ordered byte stream)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Lets you restart the server immediately without "Address already in use"
